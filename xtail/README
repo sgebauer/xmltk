@@ -1,0 +1,16 @@
+xtail usage is
+
+xtail
+[-b]		(output binary stream)
+[-c xpath-expr]  (context; optional -- if not specified context is
+assumed to be root)
+[-e xpath-expr]  (element to tail)
+[-n number] (num elements to tail if positive, num elements to head if
+negative; optional -- default to 10)
+[FILE]
+
+-c and -e can be repeated many times
+
+also, you can build xhead by "make -f makefile.xhead clean" then "make
+-f makefile.xhead".  semantics are identical, except that the -n
+parameters have sign reversed.

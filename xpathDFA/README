@@ -1,0 +1,49 @@
+LazyDFA Limitations:	Aug 12/2002
+
+== supported ==
+1. The predicate needs to be written with an attribute or value.
+   If the predicate is binary, it has to be [attribute operator value]
+   order. 
+   e.g. //book[@year]/title, //book[@year=1999]/title, 
+        //book[contains(title/text(),'XML)]/title, 
+2. The position predicate can be used at any location step.
+   e.g. /bib/book[2]/author[1]
+3. Predicates can be concatinated.
+   e.g. //book[2][@year=1999]/title[contains(text(),'XML')/text()
+
+== not supported (restrictions) ==
+4. The tail location step can not have the predicate written in 
+   the above, because the lazyDFA does not support output XML 
+   buffering.
+   n.g. //book[@year]
+   o.k. //book[@year]/title
+5. DoubleSlash with position predicate is not supported.
+   n.g. /bib/book//name[2]
+   "book" has to control the increment/reset the
+   number of "name".
+6. Position predicate following another predicate is not supported.
+   n.g. //book[@year=1998][2]
+   o.k. //book[2][@year=1998]
+   "@year" has to control the increment and
+   "book" has to control the reset.
+7. Element or "." is not supported in the predicate.
+   n.g. //book[contains(.,'XML')]/title
+8. Such XPath expressions that uses both "//" and any predicate does 
+   not work correctly. The lazyDFA does not output error message in
+   this case.
+   Precisely saying, such XPath expressions does not work correctly if 
+   it contains some predicate and it matches with prural XML fragment 
+   simaltaniously. For example, //a/a[1] matches two XML fragment in 
+   the following XML. 
+<a>                  <-- 1st context starts here
+  <a>                <-- 1st context completed here.
+		         simaltaniously, 2nd context starts here.
+    <c>123</c> 
+    <a> 
+      <c>123</c> 
+      <d>456</d> 
+    </a> 
+    <d>456</d> 
+  </a> 
+</a> 
+

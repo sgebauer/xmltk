@@ -1,0 +1,78 @@
+#
+#  copyright (C) 2001 TJ Green, Makoto Onizuka, Dan Suciu, 
+#                     University of Washington
+#  $Id: makefile.xerces,v 1.1.1.1 2002/05/04 12:53:58 tjgreen Exp $
+
+#
+# commands
+#
+CC	= gcc
+AR	= ar
+CXX	= g++ 
+LEX	= flex -l
+# YACC	= yacc -b xmatch # -v
+YACC	= bison # -v
+BINDIR  = $(HOME)/bin
+
+#
+# application sources
+# 
+SRC	= XmatchHandlers.cxx Xmatch.cxx # for xerces
+STREAM_DIR = ../streamIndex # for xpath
+
+#
+# flags
+#
+LIB_DIR = -L${XERCESCROOT}/lib		# for xerces
+INC_DIR = -I${XERCESCROOT}/include	# for xerces
+LIBNAME = -lxerces-c1_4 -lxmltkdfa	# for xerces
+
+LIBRARY_SEARCH_PATHS= -L. ${LIB_DIR}
+
+CFLAGS  = -g -Wall -DXERCES_PARSER # -DXMLTK_DEBUG  # -pg # -DXMLTK_OUTPUT # 
+LDFLAGS = -g ${LIBRARY_SEARCH_PATHS} ${LIBNAME} -ll # -pg
+INCLUDES= -I. ${INC_DIR} -I${STREAM_DIR}
+
+#
+# xpath FA sources
+# 
+LEXSRC	= xmatch.l
+YACCSRC = xmatch.y
+LIBSRC	= Error.cxx List.cxx Root.cxx Node.cxx XPath.cxx Query.cxx Automata.cxx Variable.cxx Predicate.cxx
+LIBCSRC	= xmatch.tab.c lex.yy.c addressComp.c
+LIB	= libxmltkdfa.a
+
+#
+# binary
+#
+
+.SUFFIXES: .o .c .cxx
+
+.cxx.o:
+	$(CXX) $(INCLUDES) -c $(CFLAGS) $*.cxx
+
+.c.o:
+	$(CC) -c $(CFLAGS) $*.c
+
+LIBOBJ	= $(LIBSRC:.cxx=.o) $(LIBCSRC:.c=.o)
+OBJ	= $(SRC:.cxx=.o)
+
+all: $(LIB)
+
+$(LIB): $(LIBOBJ)
+	rm -f $(LIB)
+	$(AR) -rs $(LIB) $(LIBOBJ)
+	ranlib $(LIB)
+
+depend: $(SRC:.cxx=.d)
+
+clean:
+	rm -f $(LIB) $(LIBOBJ) $(OBJ) *.d $(CSRC) xmatch.tab.h xmatch.tab.cxx xmatch.tab.c lex.yy.c core
+
+lex.yy.c: $(LEXSRC)
+	$(LEX) $(LEXSRC)
+
+xmatch.tab.cxx xmatch.tab.h:$(YACCSRC)
+	$(YACC) -d $(YACCSRC); mv xmatch.tab.c xmatch.tab.cxx
+
+lex.yy.o: lex.yy.c xmatch.tab.h

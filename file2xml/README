@@ -1,0 +1,25 @@
+Author: Iliana Avila-Campillo
+Date:   August, 23, 2001.
+Tool:   xtraverse
+
+/// UNDER CONSTRUCTION ///
+
+
+To use this tool:
+
+1. make
+2. ./xtraverse
+   This prints the usage of the tool.
+
+Usage:
+
+./xtraverse [-s start directory] [-f output file]
+
+Traverses the directory structure starting at "start directory." If no
+-s switch is given, it defaults at root. It outputs the XML view of the
+filesystem starting at "start directory" or root to "output file." If no
+-f switch is given, the output is directed to standard output.
+
+Comments:
+You can get some performance statistics, if you define a variable
+XMLTK_PERFORMANCE as compile flag.

@@ -1,0 +1,102 @@
+README - XAGG OPERATION
+xagg - a tool for xml data aggregation
+Demian Raven, 3/2002
+demiart@hotmail.com
+
+xagg usage is:
+
+xagg
+	[-h]				//help information
+	[FILE]				//optional - input file
+					//default - if FILE not included, then stdin
+	[-b]				//optional - to output a binary stream
+	[-f filename]			//optional - to read commands from an external file
+	[-t elementname]		//optional - to rename the root element upon output
+	[-c xpath-expr]			//necessary - the context in which we are searching
+		[-t tagname]		//optional - to rename the element corresponding to the context
+	[-a aggtype scalartype xpath-expr] 	//necessary - the function we are applying,
+						//the scalar type to interpret data as,
+						//and the context we are searching for
+		[-t tagname]		//optional - to rename the element enclosing the result
+
+
+NOTES:
+	- many aggregate contexts may be sought for under any given context.
+	- we may have many context-aggregate queries in one xagg session.
+	- the contexts must NOT overlap.  One should know something about the data.
+	- the first context (-c xpath) may be omitted, and it will default to "/", the root.
+
+
+EXAMPLES:
+	
+1: xagg a.xml -c / -a sum int //count
+	This sums all counts anywhere within the root context in file a.xml.
+2: xagg b.xml -a count text //para -a sum text /header
+	This counts all paras anywhere under the root 
+	and concatenates the contents of all headers directly below the root.
+3: xagg c.xml -c //bank -a average float /account -c //library -a first text //book
+	This averages all accounts directly below each bank element, 
+	for each bank element, and it gets the first book for each library
+4: xagg d.xml -f com.txt
+	This reads the commands from the file com.txt and applies them against d.xml
+5: xagg e.xml -t myout -c / -t mycon -a id#5 text /person/lastname -t surname
+	This gets the fifth person's lastname directly under the root.
+	The result is in "surname" element tags,
+	the context is in "mycon" element tags,
+	and everything is enclosed in "myout" element tags
+6: xagg -a sum int picas
+	This sums all picas, which are read as ints, from either stdin or from a pipe.
+
+SCALAR TYPES:
+
+1: "INT" or "INTEGER" or "int" or "integer" - for integer data.
+2: "FLOAT" or "float" - for floating-point data
+3: "TEXT" or "CDATA" or "text" or "cdata" - for character strings
+4: "DEPTH" or "depth" - integral type for measuring element depth
+5: "LENGTH" or "length" - integral type for content string length
+
+AGGREGATE TYPES:
+
+1: "SUM" or "sum" - in the case of text data, this concatenates the data
+	otherwise, it adds data corresponding to scalar type.
+2: "MAX" or "max" - returns the maximum value.  Does not function for text data.
+3: "MIN" or "min" - returns the minimum value.  Does not function for text data.
+4: "FIRST" or "first" - returns the first data value found.
+5: "LAST" or "last" - returns the last data value found.
+6: "ID#" or "id#" or "CHOICE#" or "choice#" - finds the ith data value.  Returns 0 
+	if i is negative or out-of-bounds.  Must supply an i-value.  
+	Example: id#23 or CHOICE#436
+7: "COUNT" or "count" - counts the instances of the xpath expression.  Ignores
+	scalar types returns an integer value.
+8: "AVERAGE" or "average" - returns the average value. If the scalar type is INT, then
+	it returns an integer.  If the scalar type is float, a float is returned.
+	AVERAGE does not function with TEXT.
+
+
+COMPLETE GRAMMAR:
+
+xagg := xagg (FILE)? (BTAG)? (IFILE)? (OUTPUT)? SEARCH
+FILE := cdata
+IFILE := FTAG cdata
+FTAG := "-f" | "-file"
+SEARCH := ( CONTEXT? AGGREGATE+ )+
+CONTEXT := CTAG XPATH (OUTPUT)?
+AGGREGATE := ATAG ATYPE STYPE XPATH (OUTPUT)? 
+OUTPUT := TAG cdata
+XPATH := cdata
+TAG := "-t" | "-tag"
+CTAG := "-c" | "-context"
+ATAG := "-a" | "-aggregate"
+ATYPE := "sum" | "SUM" |
+	 "min" | "MIN" |
+	 "max" | "MAX" |
+	 "first" | "FIRST" |
+	 "last" | "LAST" |
+ 	 "average" | "AVERAGE" |
+	 "count" | "COUNT" |
+	 "id#"IVAL | "ID#"IVAL | "choice#"IVAL | "CHOICE#"IVAL
+STYPE := "int" | "INT" | "integer" | "INTEGER" |
+	 "float" | "FLOAT" |
+	 "text" | "TEXT" | "cdata" | "CDATA" | 
+ 	 "depth" | "DEPTH"
+IVAL := idata
